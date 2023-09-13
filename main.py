@@ -5,7 +5,7 @@ import numpy as np
 from ultralytics import YOLO
 from tracker import *
 
-model = YOLO('yolov8s.pt') # affect to accuracy of object when tracking
+model = YOLO('yolov8m.pt') # affect to accuracy of object when tracking
 
 # cursor coordinate
 def RGB(event,x,y,flags,param):
@@ -23,7 +23,10 @@ my_file = open('coco.txt','r')
 data = my_file.read()
 class_list = data.split('\n')
 
-tracker = Tracker()
+tracker = Tracker() # define object tracker
+
+area1 = [(494,289),(505,499),(578,496),(530,292)]
+area2 = [(548,290),(600,496),(637,493),(574,288)]
 
 while True:
   success,frame = cap.read()
@@ -54,10 +57,20 @@ while True:
     bbox_idx = tracker.update(list)
     for bbox in bbox_idx:
       x3,y3,x4,y4,id = bbox
+      cv2.circle(frame,(x4,y4),7,(255,0,255),-1)
       cv2.rectangle(frame,(x3,y3),(x4,y4),(255,255,255),2)
       cvzone.putTextRect(frame,f'{id}',(x3,y3),1,1)
 
-  print(list)
+  # print(list)
+
+  # set detection area
+  cv2.polylines(
+    frame, # drawing medium
+    [np.array(area1,np.int32)], # change format fit to polylines format
+    True, # closed polygon --> every poin is connected
+    (0,255,0), # RGB color
+    2 # line weight
+  )
   cv2.imshow('RGB', frame)
   if cv2.waitKey(1) & 0xFF==27:
     break

@@ -5,7 +5,7 @@ import numpy as np
 from ultralytics import YOLO
 from tracker import *
 
-model = YOLO('yolov8n.pt')
+model = YOLO('yolov8s.pt') # affect to accuracy of object when tracking
 
 # cursor coordinate
 def RGB(event,x,y,flags,param):
@@ -23,6 +23,8 @@ my_file = open('coco.txt','r')
 data = my_file.read()
 class_list = data.split('\n')
 
+tracker = Tracker()
+
 while True:
   success,frame = cap.read()
   if not success:
@@ -34,6 +36,8 @@ while True:
   result = results[0].boxes.data
   data_result = pd.DataFrame(result).astype('float')
 
+  list = []
+
   for i,row in data_result.iterrows():
     x1 = int(row[0])
     y1 = int(row[1])
@@ -43,11 +47,17 @@ while True:
     class_object = int(row[5])
     object_class = class_list[class_object]
 
-    if 'person' in object_class:
-      cv2.rectangle(frame,(x1,y1),(x2,y2),(255,255,255),2)
-      cvzone.putTextRect(frame,f'{object_class}',(x1,y1),1,1)
+    if 'person' in object_class: # only person class object
+      list.append([x1, y1, x2, y2])
 
+    # detect with bbox
+    bbox_idx = tracker.update(list)
+    for bbox in bbox_idx:
+      x3,y3,x4,y4,id = bbox
+      cv2.rectangle(frame,(x3,y3),(x4,y4),(255,255,255),2)
+      cvzone.putTextRect(frame,f'{id}',(x3,y3),1,1)
 
+  print(list)
   cv2.imshow('RGB', frame)
   if cv2.waitKey(1) & 0xFF==27:
     break

@@ -57,9 +57,17 @@ while True:
     bbox_idx = tracker.update(list)
     for bbox in bbox_idx:
       x3,y3,x4,y4,id = bbox
-      cv2.circle(frame,(x4,y4),7,(255,0,255),-1)
-      cv2.rectangle(frame,(x3,y3),(x4,y4),(255,255,255),2)
-      cvzone.putTextRect(frame,f'{id}',(x3,y3),1,1)
+      # distance between object point and object polygon
+      result = cv2.pointPolygonTest(
+        np.array(area1,np.int32), # polygon area
+        ((x4,y4)), # object point
+        False # measure distance with polygon
+      )
+      # when object point on the polygon
+      if result >= 0:
+        cv2.circle(frame,(x4,y4),7,(255,0,255),-1) # show object point
+        cv2.rectangle(frame,(x3,y3),(x4,y4),(255,255,255),2) # show object bbox
+        cvzone.putTextRect(frame,f'{id}',(x3,y3),1,1) # show object label (id)
 
   # print(list)
 

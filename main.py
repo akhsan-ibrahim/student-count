@@ -31,6 +31,9 @@ area2 = [(548,290),(600,496),(637,493),(574,288)]
 going_out = {}
 going_in = {}
 
+counter_out = []
+counter_in = []
+
 while True:
   success,frame = cap.read()
   if not success:
@@ -80,6 +83,8 @@ while True:
         cv2.circle(frame,(x4,y4),7,(255,0,255),-1) # show object point
         cv2.rectangle(frame,(x3,y3),(x4,y4),(255,255,255),2) # show object bbox
         cvzone.putTextRect(frame,f'{id}',(x3,y3),1,1) # show object label (id)
+        if counter_out.count(id) == 0: # cek unique item
+          counter_out.append(id)
 
     # (OBJECT GOING IN) distance between object point and object polygon
     result_in = cv2.pointPolygonTest(
@@ -100,10 +105,14 @@ while True:
         cv2.circle(frame,(x4,y4),7,(255,0,255),-1) # show object point
         cv2.rectangle(frame,(x3,y3),(x4,y4),(255,255,255),2) # show object bbox
         cvzone.putTextRect(frame,f'{id}',(x3,y3),1,1) # show object label (id)
+        if counter_in.count(id) == 0: # cek unique item
+          counter_in.append(id)
 
-
-  print("out:",going_out)
-  print("in:",going_in)
+  # object totals
+  total_out = len(counter_out)
+  total_in = len(counter_in)
+  cvzone.putTextRect(frame,f'GOING OUT : {total_out}',(50,60),1,1) # show object label (id)
+  cvzone.putTextRect(frame,f'GOING IN : {total_in}',(50,100),1,1) # show object label (id)
 
   # set detection area 1
   cv2.polylines(
